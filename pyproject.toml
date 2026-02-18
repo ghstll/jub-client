@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "jub"}]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4"
+python = ">=3.10,<4"
 option = "^2.1.0"
 humanfriendly = "^10.0"
 pydantic = "^2.6.4"
@@ -18,6 +18,7 @@ mictlanx = "0.1.0a3"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
 pandas = "1.4.3"
+coverage = "^7.13.4"
 
 [[tool.poetry.source]]
 name = "test"
