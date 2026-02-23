@@ -15,23 +15,19 @@
 
 import requests as R
 from nanoid import generate as nanoid
-import string
-import os
 from option import Result,Ok,Err
-from jub.dto import *
+from jub.dto import Observatory, Catalog, Product, ProductFilter, LevelCatalog
+from typing import List
 import time as T
 from jub.log import Log 
 import logging
-
+import jub.config as CX
 log = Log(
-    name                   = "prueba_miguel" ,
-    path                   = "/log" ,
-    console_handler_filter = lambda record: True ,
+    name                   = __name__ ,
+    path                   = CX.JUB_CLIENT_LOG_PATH ,
     file_handler_filter    = lambda record: record.levelno == logging.INFO
 )
 
-OBSERVATORY_ID_SIZE = int(os.environ.get("OBSERVATORY_ID_SIZE","12"))
-OBSERVATORY_ID_ALPHABET  = string.ascii_lowercase+string.digits 
 
 class JubClient(object):
     
@@ -43,12 +39,17 @@ class JubClient(object):
 
     def create_observatory(self, observatory:Observatory)->Result[str,Exception]:
         try:
+            # Server side validation for image_url and obid
             if observatory.image_url == "":
                 observatory.image_url = "https://ivoice.live/wp-content/uploads/2019/12/no-image-1.jpg"
+                
             if observatory.obid == "":
-                observatory.obid = nanoid(alphabet=OBSERVATORY_ID_ALPHABET,size=OBSERVATORY_ID_SIZE)
+                observatory.obid = nanoid(alphabet=CX.JUB_CLIENT_OBSERVATORY_ID_ALPHABET, size=CX.JUB_CLIENT_OBSERVATORY_ID_SIZE)
+            # 
             response = R.post(self.observatories_url,json=observatory.model_dump())
+            # 
             response.raise_for_status()
+            
             return Ok(observatory.obid)
         except Exception as e:
             return Err(e)
@@ -71,8 +72,7 @@ class JubClient(object):
             return Ok(obid)
         except Exception as e:
             return Err(e)
-        
-        
+          
     def get_observatory(self,obid:str)->Result[Observatory, Exception]:
         url = "{}/{}".format(self.observatories_url,obid)
         try:
@@ -105,7 +105,7 @@ class JubClient(object):
     def create_catalog(self,catalog:Catalog)->Result[str,Exception]:
         try:
             if catalog.cid == "":
-                catalog.cid = nanoid(alphabet=OBSERVATORY_ID_ALPHABET, size=OBSERVATORY_ID_SIZE)
+                catalog.cid = nanoid(alphabet=CX.JUB_CLIENT_OBSERVATORY_ID_ALPHABET, size=CX.JUB_CLIENT_OBSERVATORY_ID_SIZE)
             data = catalog.model_dump()
             response = R.post(url=self.catalogs_url,json=data)
             response.raise_for_status()
