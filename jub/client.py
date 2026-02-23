@@ -39,12 +39,17 @@ class JubClient(object):
 
     def create_observatory(self, observatory:Observatory)->Result[str,Exception]:
         try:
+            # Server side validation for image_url and obid
             if observatory.image_url == "":
                 observatory.image_url = "https://ivoice.live/wp-content/uploads/2019/12/no-image-1.jpg"
+                
             if observatory.obid == "":
                 observatory.obid = nanoid(alphabet=CX.JUB_CLIENT_OBSERVATORY_ID_ALPHABET, size=CX.JUB_CLIENT_OBSERVATORY_ID_SIZE)
+            # 
             response = R.post(self.observatories_url,json=observatory.model_dump())
+            # 
             response.raise_for_status()
+            
             return Ok(observatory.obid)
         except Exception as e:
             return Err(e)
@@ -67,8 +72,7 @@ class JubClient(object):
             return Ok(obid)
         except Exception as e:
             return Err(e)
-        
-        
+          
     def get_observatory(self,obid:str)->Result[Observatory, Exception]:
         url = "{}/{}".format(self.observatories_url,obid)
         try:

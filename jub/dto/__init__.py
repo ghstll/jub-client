@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List,Dict,Optional
-from pydantic import BaseModel,field_validator
 import re
 import json as J
+from typing import List,Dict,Optional
+from pydantic import BaseModel,field_validator
 
 class LevelCatalog(BaseModel):
     level: int
@@ -102,7 +102,6 @@ class SpatialFilter(BaseModel):
         pattern += r"\."
         pattern += re.escape(self.municipality) if self.municipality != "*" else ".*"
         return pattern.upper()
-
 
 class ProductFilter(BaseModel):
     temporal: Optional[TemporalFilter] = None
