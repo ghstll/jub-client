@@ -19,10 +19,28 @@ from typing import List,Dict,Optional
 from pydantic import BaseModel,field_validator
 
 class LevelCatalog(BaseModel):
+    """
+    This model represents a reference to a catalog associated with a specefic level.
+
+    Attributes:
+        level: The level of the catalog.
+        cid: Unique identifier of the catalog.
+    """
     level: int
     cid: str
 
 class Observatory(BaseModel):
+    """
+    Represents a context where a user can explore and interact with data.
+    
+    Attributes:
+        obid: Unique identifier of the observatory.
+        title: Display name used for the observatory.
+        image_url: URL of an image to represent the observatory.
+        description: Textual description providing context.
+        catalogs: Collection of instances from the LevelCatalog model that references the catalogs and theirs levels.
+        disabled: Indicates whether the observatory is inactive.
+    """
     obid:str=""
     title: str="Observatory"
     image_url:str=""
@@ -31,6 +49,17 @@ class Observatory(BaseModel):
     disabled:bool = False
 
 class CatalogItem(BaseModel):
+    """
+    Represents a single entry withing a Catalog.
+    
+    Attributes :
+        value: Value for storage.
+        display_name: A redeable name for the catalog item.
+        code: An unique code that identifies the catalog item.
+        description: Description 
+        metadata: A dictionary that contains extra data to provide context
+            about the catalog item.
+    """
     value:str
     display_name:str
     code:int
@@ -38,16 +67,47 @@ class CatalogItem(BaseModel):
     metadata:Dict[str,str]
 
 class Catalog(BaseModel):
+    """
+    Catalogs are used for organizing and validating attributes across specific categories. 
+ 
+    Attributes :
+        cid: Identifier of the catalog. Defaults to empty string.
+        display_name: Human-readable name of the catalog.
+        items: Collection of items that belong to this catalog
+        kind: Type of the catalog
+
+    Validators :
+        -`display_name` is normalized by a field validator.
+        -`items` ensures type consistency and whitespace normalization.
+    """
     cid:str = ""
     display_name:str = ""
     items: List[CatalogItem] = []
     kind:str = ""
     @field_validator("display_name")
     def remove_double_spaces(cls,value):
+        """
+        Normalizes `display_name` by collapsing consecutive whitespace into a single space.
+        
+        Args: 
+            value: A string with value of the attribute `display_name`
+            
+        Returns:
+            x: A new string of the `display_name` without double spaces.
+        """
         x = " ".join(value.split())
         return x
     @field_validator("items")
     def remove_double_spaces_in_items(cls,items):
+        """
+        Ensures that all the items are dict types and normalize their `display_name` fields.
+        
+        Args:
+            items: Raw items list.
+            
+        Returns:
+            xs: Normalized list of items
+        """
         xs = []
         for item in items:
             if type(item) ==dict:
@@ -58,6 +118,15 @@ class Catalog(BaseModel):
     
     @staticmethod
     def from_json( path:str)->'Catalog':
+        """
+        Creates a Catalog instance from a JSON file.
+        
+        Args:
+            path: Path string to the JSON file that contains the catalog data.
+        
+        Returns:
+            catalog: Validated Catalog instance.
+        """
         with open(path,"rb") as f:
             data = J.loads(f.read())
             catalog = Catalog(**data)
