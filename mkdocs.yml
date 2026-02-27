@@ -4,3 +4,12 @@ site_author: Jub - Client Team
 site_url: https://jub.tamps.cinvestav.com/jub-client/docs
 theme:
   name: material
+  features:
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
